@@ -3,21 +3,29 @@
 - name: just testing things
   hosts: all
   become: yes
+
   tasks:
+    - name: Install httpd.
+      yum:
+        name: httpd
+        state: present
 
-    - name: create file with touch
-      file:
-         path: ~ansible/var
-         state: touch
-         mode: 0622
-         owner: ansible
-         group: ansible
+    - name: Copy config file.
+      copy:
+        src: files/test.conf
+        dest: /etc/httpd/conf.d/test.conf
+      notify: restart httpd
 
-    - name: create file2 with touch
-      file:
-         path: ~ansible/var2
-         state: touch
-         mode: 0622
-         owner: ansible
-         group: ansible
+    - name: Ensure httpd is running and enabled at boot.
+      service:
+        name: httpd
+        state: started
+        enabled: yes
 
+  handlers:
+    - name: restart httpd
+      service:
+         name: httpd
+         state: restarted
+         
+         
